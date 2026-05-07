@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donation for Home Building Project</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Header & Language Switcher */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .lang-switcher select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            outline: none;
+            background: var(--bg);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 10px; text-align: center; }
+        .intro-text { text-align: center; color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+        textarea { resize: vertical; min-height: 80px; }
+
+        /* Payment Section */
+        .payment-section {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px dashed #cbd5e1;
+            text-align: center;
+        }
+        .payment-method { display: none; margin-top: 15px; }
+        .payment-method.active { display: block; animation: fadeIn 0.5s; }
+        
+        /* QR Images Styling */
+        .qr-image {
+            max-width: 220px;
+            width: 100%;
+            height: auto;
+            margin: 0 auto 15px auto;
+            display: block;
+            border-radius: 8px;
+            border: 2px dashed #94a3b8;
+            padding: 8px;
+            background: white;
+        }
+
+        /* PayPal Styling */
+        .paypal-info {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px auto;
+            border: 1px solid #cbd5e1;
+            display: inline-block;
+            text-align: left;
+        }
+        .paypal-info p { margin-bottom: 5px; font-size: 0.95rem; }
+        .paypal-btn {
+            display: inline-block;
+            background: #003087;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .paypal-btn:hover { background: #001f5c; }
+
+        /* File Upload */
+        .file-upload {
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--bg);
+        }
+
+        /* Submit Button */
+        button[type="submit"] {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+        }
+        button[type="submit"]:hover { background: var(--primary-hover); }
+        button[type="submit"]:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Success Message */
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .success-msg h2 { color: #16a34a; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+    <div class="header">
+        <div style="font-weight: bold; color: var(--primary);">HomeBuild Project</div>
+        <div class="lang-switcher">
+            <select id="languageSelect" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="np">नेपाली (Nepali)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- MAIN FORM -->
+    <div id="formSection">
+        <h1 id="t-title">Donation for Home Building Project</h1>
+        <p class="intro-text" id="t-desc">Your support is crucial for our home building project. Please donate and help us. Kindly fill in the details below so we can record your support. In the future, we will give back to you.</p>
+
+        <!-- Formspree Endpoint Integrated Here -->
+        <form id="donationForm" action="https://formspree.io/f/mrejagvn" method="POST" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
+            
+            <div class="form-group">
+                <label id="t-loc-label">Select Your Location (For Payment Method)</label>
+                <select id="regionSelect" name="Region" onchange="updatePaymentMethod()" required>
+                    <option value="" disabled selected id="t-loc-placeholder">-- Select Location --</option>
+                    <option value="india" id="t-loc-ind">India</option>
+                    <option value="nepal" id="t-loc-nep">Nepal</option>
+                    <option value="outside" id="t-loc-out">Outside India / Other</option>
+                </select>
+            </div>
+
+            <!-- DYNAMIC PAYMENT SECTION -->
+            <div class="payment-section">
+                <p style="font-weight:600; margin-bottom:10px;" id="t-pay-desc">Select your payment method below based on your location:</p>
+                
+                <!-- INDIA: GPay -->
+                <div id="pay-india" class="payment-method">
+                    <h3 style="color:#1a73e8; margin-bottom:10px;">Google Pay (India)</h3>
+                    <img src="gpay-qr.jpg" alt="Google Pay QR Code" class="qr-image">
+                    <p id="t-gpay-note">Scan to pay via UPI</p>
+                </div>
+
+                <!-- NEPAL: eSewa -->
+                <div id="pay-nepal" class="payment-method">
+                    <h3 style="color:#60bb46; margin-bottom:10px;">eSewa (Nepal)</h3>
+                    <img src="esewa-qr.jpg" alt="eSewa QR Code" class="qr-image">
+                    <p id="t-esewa-note">Scan to pay via eSewa</p>
+                </div>
+
+                <!-- OUTSIDE: PayPal -->
+                <div id="pay-outside" class="payment-method">
+                    <h3 style="color:#003087; margin-bottom:10px;">PayPal (Outside India)</h3>
+                    
+                    <div class="paypal-info">
+                        <p><strong id="t-paypal-email-label">Payment Email:</strong> jonomdigital@gmail.com</p>
+                        <p><strong id="t-paypal-name-label">Verify Name:</strong> ASHOK SARAMH</p>
+                    </div><br>
+
+                    <a href="https://www.paypal.com/myaccount/transfer/homepage" target="_blank" class="paypal-btn" id="t-paypal-btn">Open PayPal to Send Money</a>
+                    <p style="margin-top:15px; font-size:0.9rem; color:var(--text-muted);" id="t-paypal-note">Please transfer the amount to the email above, then upload the screenshot below.</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label id="t-amt-label">Amount</label>
+                <input type="number" name="Amount" id="t-amt-placeholder" placeholder="Enter amount you are donating" required>
+            </div>
+
+            <div class="form-group">
+                <label id="t-name-label">Name</label>
+                <input type="text" name="Name" id="t-name-placeholder" placeholder="Your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label id="t-address-label">Address</label>
+                <textarea name="Address" id="t-address-placeholder" placeholder="Your address details" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label id="t-upload-label">Please upload a screenshot of your payment confirmation below:</label>
+                <input type="file" name="PaymentScreenshot" class="file-upload" accept="image/*" required>
+            </div>
+
+            <button type="submit" id="t-submit-btn">Submit Donation Details</button>
+        </form>
+
+        <p class="footer-note" id="t-footer">Once you confirm your payment, we will send you a personal thank you and a shoutout in our upcoming video.</p>
+    </div>
+
+    <!-- SUCCESS MESSAGE SECTION -->
+    <div id="successSection" class="success-msg">
+        <h2 id="t-success-title">Thank You!</h2>
+        <p id="t-success-desc">Once you submit, we will include a special shoutout for you in our next video. Thank you so much for your kindness!</p>
+        <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; cursor:pointer; border:none; background:var(--primary); color:white; border-radius:6px;" id="t-back-btn">Go Back</button>
+    </div>
+</div>
+
+<script>
+    // --- TRANSLATION DICTIONARY ---
+    const translations = {
+        en: {
+            "t-title": "Donation for Home Building Project",
+            "t-desc": "Your support is crucial for our home building project. Please donate and help us. Kindly fill in the details below so we can record your support. In the future, we will give back to you.",
+            "t-loc-label": "Select Your Location (Where are you donating from?)",
+            "t-loc-placeholder": "-- Select Location --",
+            "t-loc-ind": "India",
+            "t-loc-nep": "Nepal",
+            "t-loc-out": "Outside India / Other",
+            "t-pay-desc": "Select your payment method below based on your location:",
+            "t-gpay-note": "Scan to pay via UPI",
+            "t-esewa-note": "Scan to pay via eSewa",
+            "t-paypal-email-label": "Payment Email:",
+            "t-paypal-name-label": "Verify Name:",
+            "t-paypal-btn": "Open PayPal to Send Money",
+            "t-paypal-note": "Please transfer the amount to the email above, then upload the screenshot below.",
+            "t-amt-label": "Amount",
+            "t-amt-placeholder": "Enter amount you are donating",
+            "t-name-label": "Name",
+            "t-name-placeholder": "Your full name",
+            "t-address-label": "Address",
+            "t-address-placeholder": "Your address details",
+            "t-upload-label": "Please upload a screenshot of your payment confirmation below:",
+            "t-submit-btn": "Submit Donation Details",
+            "t-footer": "Once you confirm your payment, we will send you a personal thank you and a shoutout in our upcoming video.",
+            "t-success-title": "Thank You!",
+            "t-success-desc": "We have received your details. We will include a special shoutout for you in our next video. Thank you so much for your kindness!",
+            "t-back-btn": "Go Back"
+        },
+        hi: {
+            "t-title": "घर निर्माण परियोजना के लिए दान",
+            "t-desc": "हमारे घर निर्माण परियोजना के लिए आपका समर्थन महत्वपूर्ण है। कृपया दान करें और हमारी मदद करें। कृपया नीचे दिए गए विवरण भरें ताकि हम आपका समर्थन दर्ज कर सकें। भविष्य में, हम आपको इसका प्रतिफल देंगे।",
+            "t-loc-label": "अपना स्थान चुनें (आप कहाँ से दान कर रहे हैं?)",
+            "t-loc-placeholder": "-- स्थान चुनें --",
+            "t-loc-ind": "भारत (India)",
+            "t-loc-nep": "नेपाल (Nepal)",
+            "t-loc-out": "भारत के बाहर / अन्य",
+            "t-pay-desc": "अपने स्थान के आधार पर नीचे अपनी भुगतान विधि चुनें:",
+            "t-gpay-note": "UPI के माध्यम से भुगतान करने के लिए स्कैन करें",
+            "t-esewa-note": "eSewa के माध्यम से भुगतान करने के लिए स्कैन करें",
+            "t-paypal-email-label": "भुगतान ईमेल (Email):",
+            "t-paypal-name-label": "सत्यापित नाम (Name):",
+            "t-paypal-btn": "पैसे भेजने के लिए PayPal खोलें",
+            "t-paypal-note": "कृपया ऊपर दिए गए ईमेल पर राशि स्थानांतरित करें, फिर नीचे स्क्रीनशॉट अपलोड करें।",
+            "t-amt-label": "राशि",
+            "t-amt-placeholder": "वह राशि दर्ज करें जो आप दान कर रहे हैं",
+            "t-name-label": "नाम",
+            "t-name-placeholder": "अपना पूरा नाम",
+            "t-address-label": "पता",
+            "t-address-placeholder": "अपने पते का विवरण",
+            "t-upload-label": "कृपया नीचे अपने भुगतान की पुष्टि का स्क्रीनशॉट अपलोड करें:",
+            "t-submit-btn": "विवरण जमा करें",
+            "t-footer": "एक बार जब आप अपना भुगतान सुनिश्चित कर लेते हैं, तो हम आपको एक व्यक्तिगत धन्यवाद और अपने आगामी वीडियो में एक विशेष उल्लेख (shoutout) भेजेंगे।",
+            "t-success-title": "धन्यवाद!",
+            "t-success-desc": "हमें आपका विवरण मिल गया है। हम अपने अगले वीडियो में आपके लिए एक विशेष धन्यवाद (shoutout) शामिल करेंगे। आपकी दयालुता के लिए बहुत-बहुत धन्यवाद!",
+            "t-back-btn": "वापस जाएँ"
+        },
+        np: {
+            "t-title": "घर निर्माण परियोजनाको लागि सहयोग",
+            "t-desc": "हाम्रो घर निर्माण परियोजनाको लागि तपाईंको समर्थन महत्त्वपूर्ण छ। कृपया सहयोग गर्नुहोस् र हामीलाई मद्दत गर्नुहोस्। कृपया तलका विवरणहरू भर्नुहोस् ताकि हामी तपाईंको समर्थन रेकर्ड गर्न सकौं। भविष्यमा, हामी तपाईंलाई फिर्ता दिनेछौं।",
+            "t-loc-label": "आफ्नो स्थान छान्नुहोस् (तपाईं कहाँबाट दान गर्दै हुनुहुन्छ?)",
+            "t-loc-placeholder": "-- स्थान छान्नुहोस् --",
+            "t-loc-ind": "भारत (India)",
+            "t-loc-nep": "नेपाल (Nepal)",
+            "t-loc-out": "भारत बाहिर / अन्य",
+            "t-pay-desc": "तपाईंको स्थानको आधारमा तल तपाईंको भुक्तानी विधि छनौट गर्नुहोस्:",
+            "t-gpay-note": "UPI मार्फत भुक्तानी गर्न स्क्यान गर्नुहोस्",
+            "t-esewa-note": "eSewa मार्फत भुक्तानी गर्न स्क्यान गर्नुहोस्",
+            "t-paypal-email-label": "भुक्तानी इमेल (Email):",
+            "t-paypal-name-label": "प्रमाणित नाम (Name):",
+            "t-paypal-btn": "पैसा पठाउन PayPal खोल्नुहोस्",
+            "t-paypal-note": "कृपया माथिको इमेलमा रकम स्थानान्तरण गर्नुहोस्, त्यसपछि तल स्क्रिनसट अपलोड गर्नुहोस्।",
+            "t-amt-label": "रकम",
+            "t-amt-placeholder": "तपाईंले दान गरिरहनुभएको रकम प्रविष्ट गर्नुहोस्",
+            "t-name-label": "नाम",
+            "t-name-placeholder": "तपाईंको पूरा नाम",
+            "t-address-label": "ठेगाना",
+            "t-address-placeholder": "तपाईंको ठेगाना विवरणहरू",
+            "t-upload-label": "कृपया तल तपाईंको भुक्तानी पुष्टिकरणको स्क्रिनसट अपलोड गर्नुहोस्:",
+            "t-submit-btn": "विवरण बुझाउनुहोस्",
+            "t-footer": "एकचोटि तपाईंले आफ्नो भुक्तानी पुष्टि गरेपछि, हामी तपाईंलाई व्यक्तिगत धन्यवाद र हाम्रो आगामी भिडियोमा विशेष उल्लेख (shoutout) पठाउनेछौं।",
+            "t-success-title": "धन्यवाद!",
+            "t-success-desc": "हामीले तपाईंको विवरण प्राप्त गरेका छौं। हामी हाम्रो अर्को भिडियोमा तपाईंको लागि विशेष धन्यवाद (shoutout) समावेश गर्नेछौं। तपाईंको दयाको लागि धेरै धेरै धन्यवाद!",
+            "t-back-btn": "पछाडि जानुहोस्"
+        }
+    };
+
+    // --- LOGIC ---
+
+    // Change Language
+    function changeLanguage() {
+        const lang = document.getElementById("languageSelect").value;
+        const dict = translations[lang];
+
+        for (let key in dict) {
+            const el = document.getElementById(key);
+            if (el) {
+                // If element is an input or textarea, change placeholder
+                if (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "OPTION") {
+                    if (el.tagName === "OPTION") {
+                        el.innerText = dict[key];
+                    } else {
+                        el.placeholder = dict[key];
+                    }
+                } else {
+                    el.innerText = dict[key];
+                }
+            }
+        }
+    }
+
+    // Dynamic Payment Methods
+    function updatePaymentMethod() {
+        const region = document.getElementById("regionSelect").value;
+        
+        // Hide all
+        document.getElementById("pay-india").classList.remove("active");
+        document.getElementById("pay-nepal").classList.remove("active");
+        document.getElementById("pay-outside").classList.remove("active");
+
+        // Show based on selection
+        if (region === "india") {
+            document.getElementById("pay-india").classList.add("active");
+        } else if (region === "nepal") {
+            document.getElementById("pay-nepal").classList.add("active");
+        } else if (region === "outside") {
+            document.getElementById("pay-outside").classList.add("active");
+        }
+    }
+
+    // Handle Form Submit (Smooth Fetch with Formspree)
+    function handleFormSubmit(event) {
+        event.preventDefault(); // Stop page reload
+        
+        const form = event.target;
+        const data = new FormData(form);
+        const submitBtn = document.getElementById("t-submit-btn");
+
+        // Change button text to show progress
+        const originalBtnText = submitBtn.innerText;
+        submitBtn.innerText = "Sending... Please wait";
+        submitBtn.disabled = true;
+
+        // Send data to Formspree
+        fetch(form.action, {
+            method: form.method,
+            body: data,
+            headers: { 'Accept': 'application/json' }
+        }).then(response => {
+            if (response.ok) {
+                // Success! Hide form and show Thank You message
+                document.getElementById("formSection").style.display = "none";
+                document.getElementById("successSection").style.display = "block";
+                window.scrollTo(0,0);
+                form.reset(); // clear the form
+            } else {
+                alert("Oops! There was a problem submitting your form. Please try again.");
+            }
+        }).catch(error => {
+            alert("Oops! Network error. Please try again.");
+        }).finally(() => {
+            submitBtn.innerText = originalBtnText;
+            submitBtn.disabled = false;
+        });
+    }
+
+    // Initialize with default language
+    changeLanguage();
+</script>
+
+</body>
+</html>
