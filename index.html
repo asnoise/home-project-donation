@@ -189,9 +189,12 @@
         <h1 id="t-title">Donation for Home Building Project</h1>
         <p class="intro-text" id="t-desc">Your support is crucial for our home building project. Please donate and help us. Kindly fill in the details below so we can record your support. In the future, we will give back to you.</p>
 
-        <!-- Formspree Endpoint Integrated Here -->
-        <form id="donationForm" action="https://formspree.io/f/mrejagvn" method="POST" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
+        <!-- Web3Forms Integration -->
+        <form id="donationForm" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
             
+            <!-- YOUR ACCESS KEY IS INSERTED HERE -->
+            <input type="hidden" name="access_key" value="6cf26cb3-908a-46a1-9d77-aa16aa17dba3">
+
             <div class="form-group">
                 <label id="t-loc-label">Select Your Location (For Payment Method)</label>
                 <select id="regionSelect" name="Region" onchange="updatePaymentMethod()" required>
@@ -358,8 +361,6 @@
     };
 
     // --- LOGIC ---
-
-    // Change Language
     function changeLanguage() {
         const lang = document.getElementById("languageSelect").value;
         const dict = translations[lang];
@@ -367,7 +368,6 @@
         for (let key in dict) {
             const el = document.getElementById(key);
             if (el) {
-                // If element is an input or textarea, change placeholder
                 if (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "OPTION") {
                     if (el.tagName === "OPTION") {
                         el.innerText = dict[key];
@@ -381,52 +381,44 @@
         }
     }
 
-    // Dynamic Payment Methods
     function updatePaymentMethod() {
         const region = document.getElementById("regionSelect").value;
-        
-        // Hide all
         document.getElementById("pay-india").classList.remove("active");
         document.getElementById("pay-nepal").classList.remove("active");
         document.getElementById("pay-outside").classList.remove("active");
 
-        // Show based on selection
-        if (region === "india") {
-            document.getElementById("pay-india").classList.add("active");
-        } else if (region === "nepal") {
-            document.getElementById("pay-nepal").classList.add("active");
-        } else if (region === "outside") {
-            document.getElementById("pay-outside").classList.add("active");
-        }
+        if (region === "india") document.getElementById("pay-india").classList.add("active");
+        else if (region === "nepal") document.getElementById("pay-nepal").classList.add("active");
+        else if (region === "outside") document.getElementById("pay-outside").classList.add("active");
     }
 
-    // Handle Form Submit (Smooth Fetch with Formspree)
+    // Handle Form Submit safely
     function handleFormSubmit(event) {
-        event.preventDefault(); // Stop page reload
+        event.preventDefault(); 
         
         const form = event.target;
         const data = new FormData(form);
         const submitBtn = document.getElementById("t-submit-btn");
 
-        // Change button text to show progress
         const originalBtnText = submitBtn.innerText;
         submitBtn.innerText = "Sending... Please wait";
         submitBtn.disabled = true;
 
-        // Send data to Formspree
         fetch(form.action, {
             method: form.method,
             body: data,
             headers: { 'Accept': 'application/json' }
-        }).then(response => {
-            if (response.ok) {
-                // Success! Hide form and show Thank You message
+        }).then(async response => {
+            let result = await response.json();
+            
+            if (response.status === 200) {
+                // Success
                 document.getElementById("formSection").style.display = "none";
                 document.getElementById("successSection").style.display = "block";
                 window.scrollTo(0,0);
-                form.reset(); // clear the form
+                form.reset(); 
             } else {
-                alert("Oops! There was a problem submitting your form. Please try again.");
+                alert("Error: " + (result.message || "Something went wrong"));
             }
         }).catch(error => {
             alert("Oops! Network error. Please try again.");
@@ -436,7 +428,6 @@
         });
     }
 
-    // Initialize with default language
     changeLanguage();
 </script>
 
