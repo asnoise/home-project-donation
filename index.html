@@ -189,10 +189,9 @@
         <h1 id="t-title">Donation for Home Building Project</h1>
         <p class="intro-text" id="t-desc">Your support is crucial for our home building project. Please donate and help us. Kindly fill in the details below so we can record your support. In the future, we will give back to you.</p>
 
-        <!-- Web3Forms Integration -->
-        <form id="donationForm" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
+        <form id="donationForm" action="https://api.web3forms.com/submit" method="POST" onsubmit="handleFormSubmit(event)">
             
-            <!-- YOUR ACCESS KEY IS INSERTED HERE -->
+            <!-- WEB3FORMS ACCESS KEY -->
             <input type="hidden" name="access_key" value="6cf26cb3-908a-46a1-9d77-aa16aa17dba3">
 
             <div class="form-group">
@@ -209,29 +208,24 @@
             <div class="payment-section">
                 <p style="font-weight:600; margin-bottom:10px;" id="t-pay-desc">Select your payment method below based on your location:</p>
                 
-                <!-- INDIA: GPay -->
                 <div id="pay-india" class="payment-method">
                     <h3 style="color:#1a73e8; margin-bottom:10px;">Google Pay (India)</h3>
                     <img src="gpay-qr.jpg" alt="Google Pay QR Code" class="qr-image">
                     <p id="t-gpay-note">Scan to pay via UPI</p>
                 </div>
 
-                <!-- NEPAL: eSewa -->
                 <div id="pay-nepal" class="payment-method">
                     <h3 style="color:#60bb46; margin-bottom:10px;">eSewa (Nepal)</h3>
                     <img src="esewa-qr.jpg" alt="eSewa QR Code" class="qr-image">
                     <p id="t-esewa-note">Scan to pay via eSewa</p>
                 </div>
 
-                <!-- OUTSIDE: PayPal -->
                 <div id="pay-outside" class="payment-method">
                     <h3 style="color:#003087; margin-bottom:10px;">PayPal (Outside India)</h3>
-                    
                     <div class="paypal-info">
                         <p><strong id="t-paypal-email-label">Payment Email:</strong> jonomdigital@gmail.com</p>
                         <p><strong id="t-paypal-name-label">Verify Name:</strong> ASHOK SARAMH</p>
                     </div><br>
-
                     <a href="https://www.paypal.com/myaccount/transfer/homepage" target="_blank" class="paypal-btn" id="t-paypal-btn">Open PayPal to Send Money</a>
                     <p style="margin-top:15px; font-size:0.9rem; color:var(--text-muted);" id="t-paypal-note">Please transfer the amount to the email above, then upload the screenshot below.</p>
                 </div>
@@ -254,7 +248,8 @@
 
             <div class="form-group">
                 <label id="t-upload-label">Please upload a screenshot of your payment confirmation below:</label>
-                <input type="file" name="PaymentScreenshot" class="file-upload" accept="image/*" required>
+                <!-- Notice the 'name' is removed so Web3Forms doesn't see it as a file -->
+                <input type="file" id="screenshotFile" class="file-upload" accept="image/*" required>
             </div>
 
             <button type="submit" id="t-submit-btn">Submit Donation Details</button>
@@ -360,7 +355,6 @@
         }
     };
 
-    // --- LOGIC ---
     function changeLanguage() {
         const lang = document.getElementById("languageSelect").value;
         const dict = translations[lang];
@@ -392,40 +386,76 @@
         else if (region === "outside") document.getElementById("pay-outside").classList.add("active");
     }
 
-    // Handle Form Submit safely
-    function handleFormSubmit(event) {
+    // THE MAGIC HACK: ImgBB + Web3Forms
+    async function handleFormSubmit(event) {
         event.preventDefault(); 
         
         const form = event.target;
-        const data = new FormData(form);
         const submitBtn = document.getElementById("t-submit-btn");
+        const fileInput = document.getElementById("screenshotFile");
+        const file = fileInput.files[0];
+
+        // IMGBB API KEY INSERTED HERE
+        const IMGBB_API_KEY = "db108f14abe3fb44910bf839abaae950"; 
+
+        if (!file) {
+            alert("Please upload a payment screenshot.");
+            return;
+        }
 
         const originalBtnText = submitBtn.innerText;
-        submitBtn.innerText = "Sending... Please wait";
+        submitBtn.innerText = "Uploading Image... Please wait";
         submitBtn.disabled = true;
 
-        fetch(form.action, {
-            method: form.method,
-            body: data,
-            headers: { 'Accept': 'application/json' }
-        }).then(async response => {
-            let result = await response.json();
+        try {
+            // STEP 1: Upload Image to ImgBB secretly in the background
+            const imgFormData = new FormData();
+            imgFormData.append("image", file);
+
+            const imgResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: "POST",
+                body: imgFormData
+            });
+
+            const imgResult = await imgResponse.json();
+
+            if (!imgResult.success) {
+                throw new Error("Could not upload the image. Please try a different image.");
+            }
+
+            // Get the URL of the uploaded image
+            const imageUrl = imgResult.data.url;
+
+            // STEP 2: Send text data to Web3Forms (Avoiding the Pro Tier block)
+            submitBtn.innerText = "Sending Details... Please wait";
+            const finalData = new FormData(form);
             
-            if (response.status === 200) {
-                // Success
+            // Add the image link as text so Web3Forms accepts it
+            finalData.append("Payment Screenshot Link", imageUrl);
+
+            const w3fResponse = await fetch(form.action, {
+                method: form.method,
+                body: finalData,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            const w3fResult = await w3fResponse.json();
+            
+            if (w3fResponse.status === 200) {
                 document.getElementById("formSection").style.display = "none";
                 document.getElementById("successSection").style.display = "block";
                 window.scrollTo(0,0);
                 form.reset(); 
             } else {
-                alert("Error: " + (result.message || "Something went wrong"));
+                alert("Error: " + (w3fResult.message || "Something went wrong"));
             }
-        }).catch(error => {
-            alert("Oops! Network error. Please try again.");
-        }).finally(() => {
+
+        } catch (error) {
+            alert("Oops! " + error.message);
+        } finally {
             submitBtn.innerText = originalBtnText;
             submitBtn.disabled = false;
-        });
+        }
     }
 
     changeLanguage();
